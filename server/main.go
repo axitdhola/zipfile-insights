@@ -2,14 +2,18 @@ package main
 
 import (
 	"github.com/axitdhola/zipfile-insights/server/dao"
+	"github.com/axitdhola/zipfile-insights/server/db"
 	"github.com/axitdhola/zipfile-insights/server/handlers"
 	"github.com/axitdhola/zipfile-insights/server/router"
 	"github.com/axitdhola/zipfile-insights/server/services"
 )
 
 func main() {
-	// Initialize DAOs
-	userDAO := dao.NewUserDao()
+	dbConn, err := db.NewDatabase()
+	if err != nil {
+		panic(err)
+	}
+	userDAO := dao.NewUserDao(dbConn.GetDB())
 
 	// Initialize Services
 	userService := services.NewUserService(userDAO)
