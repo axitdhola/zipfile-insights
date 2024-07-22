@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/axitdhola/zipfile-insights/server/handlers"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func InitRouter(userHandler handlers.UserHandler) *gin.Engine {
@@ -26,8 +26,14 @@ func InitRouter(userHandler handlers.UserHandler) *gin.Engine {
 	userGroup := r.Group("/users")
 	{
 		userGroup.GET("/:id", userHandler.GetUser)
-		userGroup.POST("/register", userHandler.GetUser)
-		userGroup.POST("/login", userHandler.GetUser)
+		userGroup.POST("/register", userHandler.RegisterUser)
+		userGroup.POST("/login", userHandler.LoginUser)
+	}
+
+	fileGroup := r.Group("/files")
+	{
+		fileGroup.POST("/upload", userHandler.GetUser)
+		fileGroup.GET("/:uid", userHandler.GetUser)
 	}
 
 	return r

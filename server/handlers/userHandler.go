@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/axitdhola/zipfile-insights/server/models"
 	"github.com/axitdhola/zipfile-insights/server/services"
@@ -23,28 +24,48 @@ func NewUserHandler(userServices services.UserService) UserHandler {
 }
 
 func (u *userHandler) GetUser(c *gin.Context) {
-	user := u.userService.GetUser(1)
+	id := c.Param("id")
+	userId, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := u.userService.GetUser(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, user)
 }
 
 func (u *userHandler) RegisterUser(c *gin.Context) {
-	user := models.User{}
-	c.BindJSON(&user)
-	user, err := u.userService.RegisterUser(user)
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := u.userService.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, res)
 }
 
 func (u *userHandler) LoginUser(c *gin.Context) {
-	user := models.User{}
-	c.BindJSON(&user)
-	user, err := u.userService.LoginUser(user)
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := u.userService.LoginUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, res)
 }
