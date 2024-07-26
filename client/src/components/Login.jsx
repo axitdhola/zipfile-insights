@@ -14,10 +14,13 @@ const Login = () => {
         event.preventDefault();
     
         try {
-            const result = await api.post('/api/user/login', { email, password });
-            console.log(result);
+            const result = await api.post('/users/login', { email, password });
             if (result.status === 200) {
-                localStorage.setItem('accessToken', result.data.token);
+                localStorage.setItem('userDetails', JSON.stringify({
+                    name: result.data.name,
+                    email: result.data.email,
+                    id: result.data.id
+                }));    
                 console.log("Login Success");
                 alert('Login successful!');
                 navigate('/home');

@@ -1,13 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { UserContext } from './UserContext';
 
 const Home = () => {
   const [file, setFile] = useState(null);
   const [search, setSearch] = useState('');
   const [files, setFiles] = useState([]);
-  const [userId] = useState('7'); // Replace with the actual user ID
-
+  const { user } = useContext(UserContext);
+  console.log(user, "user");
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -20,19 +21,21 @@ const Home = () => {
 
     try {
       const response = await axios.post('http://localhost:8080/files/presignedurl', {
-        key: file.name,
-        action: 'putObject',
+        key: user.id + '/' + file.name,
+        action: 'upload',
       });
 
-      const presignedUrl = response.data.url;
+      console.log(response.data);
+      const presignedUrl = response.data.presigned_url;
+      console.log(presignedUrl);
       await axios.put(presignedUrl, file, {
         headers: {
           'Content-Type': file.type,
         },
       });
-
+      alert('File uploaded successfully!');
       console.log('File uploaded successfully.');
-      fetchFiles(); // Refresh file list after upload
+      fetchFiles();
     } catch (error) {
       console.error('Error uploading file:', error);
     }
@@ -45,7 +48,7 @@ const Home = () => {
   const handleSearch = async () => {
     try {
       const response = await axios.post('http://localhost:8080/files/search', {
-        user_id: userId,
+        user_id: user.id,
         content: search,
       });
       setFiles(response.data);
@@ -56,8 +59,9 @@ const Home = () => {
 
   const handlePreview = async (file) => {
     try {
+      console.log(file);
       const response = await axios.post('http://localhost:8080/files/redirecturl', {
-        key : '11/resu_my/AxitDhola_Resume (67).pdf',
+        key : file.s3_key,
         action : 'read',
       });
       const url = response.data.presigned_url;
@@ -69,8 +73,13 @@ const Home = () => {
   };
 
   const fetchFiles = async () => {
+    if (!user || !user.id) {
+      console.error('User is not defined');
+      return;
+    }
+
     try {
-      const response = await axios.get('http://localhost:8080/files/7'); // Replace with the actual endpoint
+      const response = await axios.get(`http://localhost:8080/files/${user.id}`);
       setFiles(response.data);
     } catch (error) {
       console.error('Error fetching files:', error);
@@ -78,8 +87,14 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchFiles(); // Fetch files on component mount
-  }, []);
+    if (user && user.id) {
+      fetchFiles();
+    }
+  }, [user]);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mt-5">
@@ -117,14 +132,14 @@ const Home = () => {
       <div>
         <h4 className="mb-3">Files List</h4>
         <ul className="list-group">
-          {files.map((file, index) => (
+          {files && files.map((file, index) => (
             <li key={index} className="list-group-item">
               <strong>Name:</strong> {file.file_name}<br />
               <strong>Size:</strong> {file.size} bytes<br />
               <strong>Type:</strong> {file.type}<br />
               <strong>Created At:</strong> {new Date(file.created_at).toLocaleString()}<br />
               <button className="btn btn-secondary mt-2" onClick={() => handlePreview(file)}>
-                Preview
+                Download
               </button>
             </li>
           ))}

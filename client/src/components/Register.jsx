@@ -11,23 +11,21 @@ const Register = () => {
     const [password, setPassword] = useState();
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         
-        api.get('/api/user/auth/google')
-        .then(result => {
-            console.log(result);
-            if(result.data === "Already registered"){
-                alert("E-mail already registered! Please Login to proceed.");
+        try {
+            const result = await api.post('/users/register', {name, email, password });
+            if (result.status === 200) {
+                console.log("Register Success");
+                alert('Registration successful!');
                 navigate('/login');
+            } else {
+                alert('Please try again!');
             }
-            else{
-                alert("Registered successfully! Please Login to proceed.")
-                navigate('/login');
-            }
-            
-        })
-        .catch(err => console.log(err));
+        } catch (err) {
+            console.log(err);
+        }
     }
 
 
