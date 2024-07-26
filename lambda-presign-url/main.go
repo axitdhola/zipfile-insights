@@ -66,9 +66,9 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	switch action {
 	case "upload":
 		req, _ = svc.PutObjectRequest(&s3.PutObjectInput{
-			Bucket:      aws.String(bucket),
-			Key:         aws.String(key),
-			ContentType: aws.String("application/pdf"),
+			Bucket: aws.String(bucket),
+			Key:    aws.String(key),
+			// ContentType: aws.String("application/pdf"),
 		})
 	case "read":
 		req, _ = svc.GetObjectRequest(&s3.GetObjectInput{
@@ -106,6 +106,13 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       string(responseBody),
+		Headers: map[string]string{
+			"Content-Type":                     "text/plain",
+			"Access-Control-Allow-Origin":      "*",
+			"Access-Control-Allow-Headers":     "*",
+			"Access-Control-Allow-Methods":     "OPTIONS,POST,GET",
+			"Access-Control-Allow-Credentials": "true",
+		},
 	}, nil
 }
 
