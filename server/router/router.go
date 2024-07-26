@@ -8,13 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter(userHandler handlers.UserHandler) *gin.Engine {
+func InitRouter(userHandler handlers.UserHandler, fileHandler handlers.FileHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Content-Type"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization", "X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
@@ -32,8 +32,10 @@ func InitRouter(userHandler handlers.UserHandler) *gin.Engine {
 
 	fileGroup := r.Group("/files")
 	{
-		fileGroup.POST("/upload", userHandler.GetUser)
-		fileGroup.GET("/:uid", userHandler.GetUser)
+		fileGroup.POST("/search", fileHandler.SerachFile)
+		fileGroup.GET("/:uid", fileHandler.GetAllFiles)
+		fileGroup.POST("/presignedurl", fileHandler.GetPresignedUrl)
+		fileGroup.POST("/redirecturl", fileHandler.RedirectToPresignedUrl)
 	}
 
 	return r

@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/axitdhola/zipfile-insights/server/dao"
 	"github.com/axitdhola/zipfile-insights/server/models"
@@ -54,11 +55,11 @@ func (u *userServiceImpl) LoginUser(user models.User) (models.LoginResponse, err
 	if user.Email == "" || user.Password == "" {
 		return models.LoginResponse{}, errors.New("invalid user details")
 	}
-	res, err := u.userDao.GetUser(user.Id)
+	res, err := u.userDao.GetUserByEmail(user.Email)
 	if err != nil {
 		return models.LoginResponse{}, err
 	}
-
+	log.Println(user.Password, "-------------", res.Password)
 	err = util.CheckPassword(user.Password, res.Password)
 	if err != nil {
 		return models.LoginResponse{}, err

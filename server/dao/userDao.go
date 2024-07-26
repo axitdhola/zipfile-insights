@@ -8,6 +8,7 @@ import (
 
 type UserDao interface {
 	GetUser(id int) (models.User, error)
+	GetUserByEmail(email string) (models.User, error)
 	CreateUser(user models.User) (models.User, error)
 }
 
@@ -24,6 +25,23 @@ func NewUserDao(db *sql.DB) UserDao {
 func (u *userDaoImpl) GetUser(id int) (models.User, error) {
 	var user models.User
 	res, err := u.db.Query("SELECT * FROM users WHERE id = $1", id)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	for res.Next() {
+		err = res.Scan(&user.Id, &user.Name, &user.Email, &user.Password)
+		if err != nil {
+			return models.User{}, err
+		}
+	}
+
+	return user, nil
+}
+
+func (u *userDaoImpl) GetUserByEmail(email string) (models.User, error) {
+	var user models.User
+	res, err := u.db.Query("SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
 		return models.User{}, err
 	}

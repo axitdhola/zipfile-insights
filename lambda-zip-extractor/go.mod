@@ -1,4 +1,4 @@
-module lambda-zip-extractor
+module github.com/axitdhola/zipfile-insights/lambda-zip-extractor
 
 go 1.20
 
@@ -6,6 +6,10 @@ require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.27
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.58.2
+	github.com/gabriel-vasile/mimetype v1.4.4
+	github.com/ledongthuc/pdf v0.0.0-20240201131950-da5b75280b06
+	github.com/lib/pq v1.10.9
+	github.com/nguyenthenguyen/docx v0.0.0-20230621112118-9c8e795a11db
 )
 
 require (
@@ -25,4 +29,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.3 // indirect
 	github.com/aws/smithy-go v1.20.3 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+	golang.org/x/net v0.25.0 // indirect
 )
