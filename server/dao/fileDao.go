@@ -51,12 +51,21 @@ func (u *fileDaoImpl) GetAllFiles(userId int) ([]models.FileModel, error) {
 }
 
 func (u *fileDaoImpl) SerachFile(userId int, content string) ([]models.FileModel, error) {
-	// 	SELECT filename FROM files
-	// WHERE searchable_content @@ plainto_tsquery('english', 'this')
-
 	var files []models.FileModel
 
-	res, err := u.db.Query("SELECT ef.Id, ef.zip_id, ef.name, ef.file_size, ef.mime_type, ef.s3_key, ef.created_at FROM extracted_files ef INNER JOIN zip_file zf ON ef.zip_id = zf.id WHERE zf.user_id = $1 AND ef.searchable_content @@ plainto_tsquery('english', $2)", userId, content)
+	// res, err := u.db.Query("SELECT ef.Id, ef.zip_id, ef.name, ef.file_size, ef.mime_type, ef.s3_key, ef.created_at FROM extracted_files ef INNER JOIN zip_file zf ON ef.zip_id = zf.id WHERE zf.user_id = $1 AND ef.searchable_content @@ plainto_tsquery('english', $2) OR ef.content LIKE %$2%", userId, content)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	query := `
+    SELECT ef.Id, ef.zip_id, ef.name, ef.file_size, ef.mime_type, ef.s3_key, ef.created_at 
+    FROM extracted_files ef 
+    INNER JOIN zip_file zf ON ef.zip_id = zf.id 
+    WHERE zf.user_id = $1 AND 
+          (ef.searchable_content @@ plainto_tsquery('english', $2) OR 
+           ef.content ILIKE '%' || $2 || '%')
+`
+	res, err := u.db.Query(query, userId, content)
 	if err != nil {
 		return nil, err
 	}

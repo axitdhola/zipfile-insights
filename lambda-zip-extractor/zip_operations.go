@@ -106,9 +106,11 @@ func extractAndUpload(ctx context.Context, client *s3.Client, database *db.Datab
 			MimeType: mimeType,
 		}
 
-		err = database.InsertExtractedFile(extractedFile)
-		if err != nil {
-			log.Printf("Error inserting extracted file record: %v", err)
+		if !file.FileInfo().IsDir() {
+			err = database.InsertExtractedFile(extractedFile)
+			if err != nil {
+				log.Printf("Error inserting extracted file record: %v", err)
+			}
 		}
 	}
 
